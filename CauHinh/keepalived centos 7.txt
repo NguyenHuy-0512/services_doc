@@ -1,0 +1,66 @@
+Keepalived - centos 7
+Cung cấp giải pháp tạo ip ảo để đảm bảo tính sẵn sàng cho dịch vụ.
+
+### Cấu hình server master
+[root@thanhht ~]# cat /etc/keepalived/keepalived.conf
+vrrp_script chk_httpd {
+  #script "killall -0 httpd" ## Neu chua co lenh killall thi cai "yum install psmisc"
+  #script "pgrep httpd"
+  script "pidof httpd"
+  interval 2 # every 2 seconds
+  weight 2 # add 2 points if OK
+}
+
+
+vrrp_instance VI_1 {
+  interface ens192 # interface to monitor
+  state MASTER # MASTER on haproxy1, BACKUP on haproxy2
+  virtual_router_id 151
+  priority 101 # 101 on haproxy1, 100 on haproxy2
+  virtual_ipaddress {
+    192.168.10.123/24 # virtual ip address
+  }
+  track_script {
+    chk_httpd
+  }
+}
+
+
+
+### Cấu hình server backup
+[root@nangnt ~]# cat /etc/keepalived/keepalived.conf
+vrrp_script chk_httpd {
+  #script "killall -0 httpd"
+  #script "pgrep httpd"
+  script "pidof httpd"
+  interval 2 # every 2 seconds
+  weight 2 # add 2 points if OK
+}
+
+
+vrrp_instance VI_1 {
+  interface ens192 # interface to monitor
+  state BACKUP # MASTER on haproxy1, BACKUP on haproxy2
+  virtual_router_id 151
+  priority 100 # 101 on haproxy1, 100 on haproxy2
+  virtual_ipaddress {
+    192.168.10.123/24 # virtual ip address
+  }
+  track_script {
+    chk_httpd
+  }
+}
+
+
+##### Các cấu hình cần lưu ý
+vrrp_script: scipt để check service sống/chết
+script :lệnh kiểm tra service
+interval: thời gian mỗi lần kiểm tra service
+weight: số lần kiểm tra service
+
+vrrp_instance: cấu hình phần ip ảo (lưu ý trong cùng mạng nếu có nhiều dịch vụ cần cài đặt keepalived thì các vrrp_instance phải đặt khác nhau)
+interface: Tên card mạng cho ip ảo
+state: trạng thái của node (master/backup)
+virtual_router_id: các id của nhiều dịch vụ khác nhau thì phải để khác nhau
+priority: độ ưu tiên
+virtual_ipaddress: ip ảo

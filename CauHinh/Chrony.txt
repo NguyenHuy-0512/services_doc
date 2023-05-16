@@ -1,0 +1,67 @@
+Cài đặt và sử dụng Chrony (NTP Client) trong Linux
+Chrony là 1 phần mềm NTP Client để đồng bộ với NTP Server khá linh hoạt và hơn hẳn NTP Service
+Có 2 chương trình:
+chronyc – command line của chrony
+chronyd – daemon để bật khi boot OS
+Cài đặt Chrony trong Linux
+Một số OS, chrony được cài mặc định, nếu chưa được cài thì cài như sau:
+# yum -y install chrony [On CentOS/RHEL]
+# apt install chrony [On Debian/Ubuntu]
+# dnf -y install chrony [On Fedora 22+]
+Để kiểm tra trạng thái của chronyd sử dụng lệnh sau:
+# systemctl status chronyd [On SystemD]
+# /etc/init.d/chronyd status [On Init]
+Để enable daemon chrony vào lúc boot OS, sử dụng lệnh sau:
+# systemctl enable chronyd [On SystemD]
+# chkconfig --add chronyd [On Init]
+Cấu hình Chrony trong Linux
+File cấu hình trong file /etc/chrony.conf hoặc /etc/chrony.conf:
+server 0.rhel.pool.ntp.org iburst
+server 1.rhel.pool.ntp.org iburst
+server 2.rhel.pool.ntp.org iburst
+server 3.rhel.pool.ntp.org iburst
+stratumweight 0
+driftfile /var/lib/chrony/drift
+makestep 10 3
+logdir /var/log/chrony
+Trong đó:
+server - mô tả một máy chủ NTP để đồng bộ hóa từ đó.
+stratumweight - khoảng cách sẽ được thêm vào mỗi tầng tới nguồn đồng bộ. Giá trị mặc định là 0,0001 .
+driftfile - vị trí và tên của tệp chứa dữ liệu trôi dạt.
+Makestep - chỉ thị này khiến chrony dần dần điều chỉnh bất kỳ khoảng thời gian nào bằng cách tăng tốc hoặc làm chậm đồng hồ theo yêu cầu.
+logdir - đường dẫn đến tệp nhật ký của chrony.
+Nếu bạn muốn điều chỉnh đồng hồ hệ thống ngay lập tức và bỏ qua bất kỳ điều chỉnh nào hiện đang được thực hiện, bạn có thể sử dụng lệnh sau:
+# chronyc maketep
+Start/Stop/Enable Chrony
+Stop schony:
+# systemctl stop chrony [On SystemD]
+# /etc/init.d/chronyd stop [On Init]
+Start schony:
+# systemctl start chrony [On SystemD]
+# /etc/init.d/chronyd start [On Init]
+Để kiểm tra trạng thái của chronyd sử dụng lệnh sau:
+# systemctl status chronyd [On SystemD]
+# /etc/init.d/chronyd status [On Init]
+Để enable daemon chrony vào lúc boot OS, sử dụng lệnh sau:
+# systemctl enable chronyd [On SystemD]
+# chkconfig --add chronyd [On Init]
+Kiểm tra quá trình đồng bộ Chrony trong Linux
+# chronyc tracking
+Trong đó:
+Reference ID - ID và tên tham chiếu mà máy tính hiện đang được đồng bộ hóa.
+Reference - số bước nhảy tới một máy tính có đồng hồ tham chiếu được đính kèm.
+Ref time - đây là giờ UTC tại đó phép đo cuối cùng từ nguồn tham chiếu được thực hiện.
+System time - độ trễ của đồng hồ hệ thống từ máy chủ được đồng bộ hóa.
+Last offset - khoảng chênh lệch ước tính của lần cập nhật đồng hồ cuối cùng.
+RMS offset - giá trị trung bình dài hạn của giá trị offset.
+Frequency - đây là tốc độ mà đồng hồ của hệ thống sẽ sai nếu chronyd không sửa nó. Nó được cung cấp bằng ppm (phần triệu).
+Residual freq - tần số còn lại chỉ ra sự khác biệt giữa các số đo từ nguồn tài liệu tham khảo và tần số hiện đang được sử dụng.
+Skew - giới hạn lỗi ước tính của tần suất.
+Root delay - tổng số độ trễ của đường dẫn mạng đến máy tính tầng, từ đó máy tính đang được đồng bộ hóa.
+Leap status - đây là trạng thái nhảy vọt có thể có một trong các giá trị sau - bình thường, chèn giây, xóa thứ hai hoặc không được đồng bộ hóa.
+Để kiểm tra thông tin nguồn chrony, dùng lệnh sau:
+chronyc sources
+Log file
+logdir /var/log/chrony
+Phần kết luận
+Đây là phần trình bày về tiện ích chrony và cách nó có thể được sử dụng trên hệ thống Linux của bạn. Nếu bạn muốn kiểm tra thêm chi tiết về chrony, hãy xem lại tài liệu chrony .
